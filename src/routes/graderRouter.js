@@ -29,6 +29,27 @@ graderRouter.post("/grade", (req, res) => {
 
 })
 
+graderRouter.post("/member/tally", (req, res) => {
+    console.log(req.body)
+    try {
+
+        connection.query(`select * from Produce_Tally where member_number = '${req.body.number}' and WEEK(tally_date) ='${req.body.week_number}'`, (err, result) => {
+            if (err) {
+                console.log(err)
+                res.send("no data")
+            } else {
+                console.log(result)
+                res.send(result)
+            }
+
+
+
+        })
+    } catch (err) {
+
+    }
+})
+
 
 
 

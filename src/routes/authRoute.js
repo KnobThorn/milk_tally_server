@@ -32,7 +32,8 @@ authRouter.post("/login", (req, res) => {
 
     })
 
-    authRouter.post("/verify", (req, res) => {
+
+    authRouter.post("/member/verify", (req, res) => {
         try {
             const token = req.body.token;
             jwt.verify(token, 'i have a secret', (err, decoded) => {

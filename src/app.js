@@ -2,7 +2,7 @@ const express = require("express")
 const connection = require("./config/database")
 const graderRouter = require("./routes/graderRouter")
 const authRouter = require("./routes/authRoute")
-const authGrader = require("./routes/authGrader")
+    // const authGrader = require("./routes/authGrader")
 const cors = require("cors")
 
 const app = express()
@@ -29,7 +29,7 @@ app.use(cors(corsOptions));
 
 app.use("/", graderRouter)
 app.use("/", authRouter)
-app.use("/", authGrader)
+    // app.use("/", authGrader)
 
 
 

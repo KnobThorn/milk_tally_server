@@ -2,6 +2,40 @@ const express = require("express")
 const authRouter = express.Router()
 const jwt = require("jsonwebtoken")
 const connection = require("../config/database")
+const bcrypt = require("bcrypt")
+const { decode } = require("punycode")
+
+//this is a route for creating a new user who could be a member or a grader
+authRouter.post("/register", (req, res) => {
+
+    const { register_user_name, register_route_id, register_user_id, register_user_password, register_user_role, register_collection_center_id } = req.body;
+    // we are encrpting the password
+    bcrypt.hash(register_user_password, 10, (err, hash) => {
+
+        if (err) {
+            res.json({ created: false, msg: "user was not created" })
+            console.log(err)
+
+        } else {
+            connection.query(`insert into Users (user_name, user_id, user_password, user_role, user_collection_center_id,user_route_number) values('${register_user_name}', '${register_user_id}', '${hash}', '${register_user_role}', '${register_collection_center_id}','${register_route_id}')`, (err, result) => {
+                if (err) {
+                    res.json({ created: false, msg: "user was not created" })
+                    console.log(err)
+                } else {
+
+                    res.json({ created: true, msg: "user was  created successfully" })
+
+                }
+
+            })
+        }
+
+
+    })
+
+
+
+})
 
 authRouter.post("/login", (req, res) => {
     console.log("auth route accessed .... ")
@@ -9,22 +43,43 @@ authRouter.post("/login", (req, res) => {
     console.log(req.body)
 
     const { login_member_name, login_member_id, login_member_password } = req.body;
-    connection.query(`select * from Member where member_name ='${login_member_name}' and member_id = '${login_member_id}' and member_password = '${login_member_password}'`, (err, result) => {
+
+    connection.query(`select * from Users where user_name ='${login_member_name}' and user_id = '${login_member_id}' `, (err, result) => {
         if (err) {
-            res.json({ msg: "unable to retrieve data", authenticated: false })
+            res.json({ msg: "unable to auhenticate", authenticated: false })
             console.log(err)
         } else {
             if (result.length == 0) {
-                res.json({ msg: "Invalid Login credentials", authenticated: false })
+                res.json({ msg: "Invalid  user details", authenticated: false })
+
 
 
             } else {
                 // console.log(result[0].member_number)
-                const user = { member_id: result[0].member_id, member_name: result[0].member_name, member_collection_center_id: result[0].member_collection_center_id }
 
-                const token = jwt.sign(user, "i have a secret", { expiresIn: "1h" })
-                console.log(token, user)
-                res.json({ authenticated: true, token: token, msg: "sucessfully authenticated" })
+                bcrypt.compare(login_member_password, result[0].user_password, (err, results) => {
+                    if (err) {
+                        console.log(err)
+                    } else {
+
+                        if (results) {
+                            console.log(result)
+
+
+                            const user = { member_id: result[0].user_id, user_role: result[0].user_role, user_name: result[0].user_name }
+
+                            const token = jwt.sign(user, "i have a secret", { expiresIn: "1h" })
+                            console.log(token, user)
+                            res.json({ authenticated: true, role: user.user_role, token: token, msg: "sucessfully authenticated" })
+                        } else {
+                            res.json({ msg: "Invalid Login credentials", authenticated: false })
+
+                        }
+                    }
+
+                })
+
+
 
             }
         }
@@ -34,12 +89,13 @@ authRouter.post("/login", (req, res) => {
 
 
     authRouter.post("/member/verify", (req, res) => {
+        console.log("am trying to authenticate")
         try {
             const token = req.body.token;
             jwt.verify(token, 'i have a secret', (err, decoded) => {
 
                 if (err) {
-                    res.status(401).json({ login: false, msg: "unable to authenticate" })
+                    res.status(200).json({ login: false, msg: "unable to authenticate" })
                 } else {
                     console.log(decoded)
                     res.status(200).json({ login: true, member: decoded, msg: "You have been authenticated successfully" })

@@ -4,6 +4,7 @@ const graderRouter = require("./routes/graderRouter")
 const authRouter = require("./routes/authRoute")
     // const authGrader = require("./routes/authGrader")
 const cors = require("cors")
+const createRouter = require("./routes/createRouter")
 
 const app = express()
 
@@ -28,7 +29,7 @@ app.use(express.json())
 app.use(cors(corsOptions));
 
 app.use("/", graderRouter)
-app.use("/", authRouter)
+app.use("/", authRouter, createRouter)
     // app.use("/", authGrader)
 
 

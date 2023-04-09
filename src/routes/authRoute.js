@@ -7,31 +7,40 @@ const { decode } = require("punycode")
 
 //this is a route for creating a new user who could be a member or a grader
 authRouter.post("/register", (req, res) => {
+    try {
 
-    const { register_user_name, register_route_id, register_user_id, register_user_password, register_user_role, register_collection_center_id } = req.body;
-    // we are encrpting the password
-    bcrypt.hash(register_user_password, 10, (err, hash) => {
+        const { register_user_name, register_route_id, register_user_id, register_user_password, register_user_role, register_collection_center_id } = req.body;
+        // we are encrpting the password
+        bcrypt.hash(register_user_password, 10, (err, hash) => {
 
-        if (err) {
-            res.json({ created: false, msg: "user was not created" })
-            console.log(err)
+            if (err) {
+                res.json({ created: false, msg: "user was not created" })
+                console.log(err)
 
-        } else {
-            connection.query(`insert into Users (user_name, user_id, user_password, user_role, user_collection_center_id,user_route_number) values('${register_user_name}', '${register_user_id}', '${hash}', '${register_user_role}', '${register_collection_center_id}','${register_route_id}')`, (err, result) => {
-                if (err) {
-                    res.json({ created: false, msg: "user was not created" })
-                    console.log(err)
-                } else {
+            } else {
+                connection.query(`insert into Users (user_name, user_id, user_password, user_role, user_collection_center_id,user_route_number) values('${register_user_name}', '${register_user_id}', '${hash}', '${register_user_role}', '${register_collection_center_id}','${register_route_id}')`, (err, result) => {
+                    if (err) {
+                        res.json({ created: false, msg: "user was not created" })
+                        console.log(err)
+                    } else {
 
-                    res.json({ created: true, msg: "user was  created successfully" })
+                        res.json({ created: true, msg: "user was  created successfully" })
 
-                }
+                    }
 
-            })
-        }
+                })
+            }
 
 
-    })
+        })
+
+
+    } catch (err) {
+        res.json({ created: false, msg: "user was not created" })
+        console.log(err)
+
+
+    }
 
 
 
@@ -51,6 +60,7 @@ authRouter.post("/login", (req, res) => {
         } else {
             if (result.length == 0) {
                 res.json({ msg: "Invalid  user details", authenticated: false })
+                console.log(result)
 
 
 
@@ -110,6 +120,7 @@ authRouter.post("/login", (req, res) => {
 
         }
 
+
     })
 
 
@@ -122,6 +133,20 @@ authRouter.post("/login", (req, res) => {
 
 
 
+})
+authRouter.get("/tally", (req, res) => {
+    try {
+        connection.query(`select * from Produce_Tally`, (err, result) => {
+            if (err) {
+                console.log(err)
+            }
+            res.send(result)
+        })
+
+    } catch (error) {
+        console.log(err)
+
+    }
 })
 
 

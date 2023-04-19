@@ -5,6 +5,46 @@ const connection = require("../config/database")
 const bcrypt = require("bcrypt")
 const { decode } = require("punycode")
 
+
+//get tallies by userid
+authRouter.get("/tallies/:id", (req, res) => {
+    try {
+        connection.query(`select * from Produce_Tally where tally_user_id = '${req.params.id}'`, (err, result) => {
+            if (err) {
+                console.log(err)
+            }
+            res.send(result)
+
+        })
+
+    } catch (err) {
+        console.log(err)
+
+    }
+})
+
+//select only those whose role is member.
+authRouter.get("/users", (req, res) => {
+    try {
+        connection.query(`select * from Users where user_role='member'`, (err, result) => {
+            if (err) {
+                console.log(err)
+                res.send([])
+            }
+            res.send(result)
+
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.send([])
+
+
+    }
+
+})
+
+
 //this is a route for creating a new user who could be a member or a grader
 authRouter.post("/register", (req, res) => {
     try {

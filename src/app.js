@@ -33,13 +33,10 @@ app.use("/", authRouter, createRouter)
     // app.use("/", authGrader)
 
 
-
-
-
-
-
-
-
 app.listen(3001, (err) => {
     console.log("app is listening on port 3001")
 })
+
+
+
+
